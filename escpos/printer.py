@@ -48,14 +48,34 @@ class Usb(Escpos):
 
         try:
             self.device.set_configuration()
-            self.device.reset()
         except usb.core.USBError as e:
             print "Could not set configuration: %s" % str(e)
 
 
+        #get the configuration
+        cfg = self.device.get_active_configuration()
+        #get the first interface/alternate interface 
+        interface_number = cfg[(0,0)].bInterfaceNumber
+        alternate_setting = usb.control.get_interface(self.device, interface_number)
+        intf = usb.util.find_descriptor(
+            cfg, bInterfaceNumber = interface_number,
+            bAlternateSetting = alternate_setting
+        )
+
+        self.handle = usb.util.find_descriptor(
+            intf,
+            # match the first OUT endpoint
+            custom_match = \
+            lambda e: \
+                usb.util.endpoint_direction(e.bEndpointAddress) == \
+                usb.util.ENDPOINT_OUT
+        )
+        assert self.handle is not None
+
     def _raw(self, msg):
         """ Print any command sent in raw format """
-        self.device.write(self.out_ep, msg, self.interface)
+        """ self.device.write(self.out_ep, msg, self.interface) """
+        self.handle.write(msg)
 
 
     def __del__(self):
