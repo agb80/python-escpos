@@ -74,7 +74,6 @@ class Usb(Escpos):
 
     def _raw(self, msg):
         """ Print any command sent in raw format """
-        """ self.device.write(self.out_ep, msg, self.interface) """
         self.handle.write(msg)
 
 
