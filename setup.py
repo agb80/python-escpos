@@ -6,7 +6,7 @@ setup(
     name='escpos',
     version='2.7',
     url='http://code.google.com/p/python-escpos',
-    download_url='http://python-escpos.googlecode.com/files/python-escpos-1.0.zip',
+    download_url='http://gitlab.fedrojesa.dtdns.net/openrestaurant/python-escpos/repository/archive',
     description='Python library to manipulate ESC/POS Printers',
     license='GNU GPL v3',
     long_description=open('README').read(),
