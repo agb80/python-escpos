@@ -11,8 +11,8 @@ HW_INIT   = '\x1b\x40'         # Clear data in buffer and reset modes
 HW_SELECT = '\x1b\x3d\x01'     # Printer select
 HW_RESET  = '\x1b\x3f\x0a\x00' # Reset printer hardware
 # Cash Drawer
-CD_KICK_2 = '\x1b\x70\x00'     # Sends a pulse to pin 2 [] 
-CD_KICK_5 = '\x1b\x70\x01'     # Sends a pulse to pin 5 [] 
+CD_KICK_2 = '\x1b\x70\x00\x19\xff'     # Sends a pulse to pin 2 [] 
+CD_KICK_5 = '\x1b\x70\x01\x19\xff'     # Sends a pulse to pin 5 [] 
 # Paper
 PAPER_FULL_CUT  = '\x1d\x56\x00' # Full cut paper
 PAPER_PART_CUT  = '\x1d\x56\x01' # Partial cut paper
