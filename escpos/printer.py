@@ -18,7 +18,8 @@ from exceptions import *
 class Usb(Escpos):
     """ Define USB printer """
 
-    def __init__(self, idVendor, idProduct, interface=0, in_ep=0x82, out_ep=0x01):
+    def __init__(self, idVendor, idProduct, interface=0, in_ep=0x82,
+                 out_ep=0x01):
         """
         @param idVendor  : Vendor ID
         @param idProduct : Product ID
@@ -26,25 +27,32 @@ class Usb(Escpos):
         @param in_ep     : Input end point
         @param out_ep    : Output end point
         """
-        self.idVendor  = idVendor
+        self.idVendor = idVendor
         self.idProduct = idProduct
         self.interface = interface
-        self.in_ep     = in_ep
-        self.out_ep    = out_ep
-	self.open()
+        self.handle = None
+        self.in_ep = in_ep
+        self.out_ep = out_ep
+        self.open()
 
 
     def open(self):
         """ Search device on USB tree and set is as escpos device """
-        self.device = usb.core.find(idVendor=self.idVendor, idProduct=self.idProduct)
+        self.device = usb.core.find(idVendor=self.idVendor,
+                                    idProduct=self.idProduct)
         if self.device is None:
             print "Cable isn't plugged in"
 
-        if self.device.is_kernel_driver_active(0):
-            try:
-                self.device.detach_kernel_driver(0)
-            except usb.core.USBError as e:
-                print "Could not detatch kernel driver: %s" % str(e)
+        try:
+            # This feature is only available on linux
+            if self.device.is_kernel_driver_active(0):
+                try:
+                    self.device.detach_kernel_driver(0)
+                except usb.core.USBError as e:
+                    print "Could not detatch kernel driver: %s" % str(e)
+        except:
+            # Simply pass because windows not implement is_kernel_driver_active
+            pass
 
         try:
             self.device.set_configuration()
@@ -52,20 +60,21 @@ class Usb(Escpos):
             print "Could not set configuration: %s" % str(e)
 
 
-        #get the configuration
+        # get the configuration
         cfg = self.device.get_active_configuration()
-        #get the first interface/alternate interface 
-        interface_number = cfg[(0,0)].bInterfaceNumber
-        alternate_setting = usb.control.get_interface(self.device, interface_number)
+        # get the first interface/alternate interface
+        interface_number = cfg[(0, 0)].bInterfaceNumber
+        alternate_setting = usb.control.get_interface(self.device,
+                                                      interface_number)
         intf = usb.util.find_descriptor(
-            cfg, bInterfaceNumber = interface_number,
-            bAlternateSetting = alternate_setting
+            cfg, bInterfaceNumber=interface_number,
+            bAlternateSetting=alternate_setting
         )
 
         self.handle = usb.util.find_descriptor(
             intf,
             # match the first OUT endpoint
-            custom_match = \
+            custom_match=\
             lambda e: \
                 usb.util.endpoint_direction(e.bEndpointAddress) == \
                 usb.util.ENDPOINT_OUT
@@ -88,23 +97,30 @@ class Usb(Escpos):
 class Serial(Escpos):
     """ Define Serial printer """
 
-    def __init__(self, devfile="/dev/ttyS0", baudrate=9600, bytesize=8, timeout=1):
+    def __init__(self, devfile="/dev/ttyS0", baudrate=9600,
+                 bytesize=8, timeout=1):
         """
         @param devfile  : Device file under dev filesystem
         @param baudrate : Baud rate for serial transmission
         @param bytesize : Serial buffer size
         @param timeout  : Read/Write timeout
         """
-        self.devfile  = devfile
+        self.devfile = devfile
         self.baudrate = baudrate
         self.bytesize = bytesize
-        self.timeout  = timeout
+        self.timeout = timeout
         self.open()
 
 
     def open(self):
         """ Setup serial port and set is as escpos device """
-        self.device = serial.Serial(port=self.devfile, baudrate=self.baudrate, bytesize=self.bytesize, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=self.timeout, dsrdtr=True)
+        self.device = serial.Serial(port=self.devfile,
+                                    baudrate=self.baudrate,
+                                    bytesize=self.bytesize,
+                                    parity=serial.PARITY_NONE,
+                                    stopbits=serial.STOPBITS_ONE,
+                                    timeout=self.timeout,
+                                    dsrdtr=True)
 
         if self.device is not None:
             print "Serial printer enabled"
@@ -127,7 +143,7 @@ class Serial(Escpos):
 class Network(Escpos):
     """ Define Network printer """
 
-    def __init__(self,host,port=9100):
+    def __init__(self, host, port=9100):
         """
         @param host : Printer's hostname or IP address
         @param port : Port to write to
@@ -170,7 +186,7 @@ class File(Escpos):
 
     def open(self):
         """ Open system file """
-	self.device = open(self.devfile, "wb")
+        self.device = open(self.devfile, "wb")
 
         if self.device is None:
             print "Could not open the specified file %s" % self.devfile
@@ -178,7 +194,7 @@ class File(Escpos):
 
     def _raw(self, msg):
         """ Print any command sent in raw format """
-        self.device.write(msg);
+        self.device.write(msg)
 
 
     def __del__(self):
