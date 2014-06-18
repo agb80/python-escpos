@@ -85,8 +85,10 @@ class Usb(Escpos):
         """ Print any command sent in raw format """
         self.handle.write(msg)
 
-
-    def __del__(self):
+    def __enter__ (self):
+        return self
+    
+    def __exit__(self, exc, val, trace):
         """ Release USB interface """
         if self.device:
             usb.util.dispose_resources(self.device)
@@ -132,8 +134,10 @@ class Serial(Escpos):
         """ Print any command sent in raw format """
         self.device.write(msg)
 
+    def __enter__ (self):
+        return self
 
-    def __del__(self):
+    def __exit__(self, exc, val, trace):
         """ Close Serial interface """
         if self.device is not None:
             self.device.close()
@@ -166,8 +170,10 @@ class Network(Escpos):
         """ Print any command sent in raw format """
         self.device.send(msg)
 
+    def __enter__ (self):
+        return self
 
-    def __del__(self):
+    def __exit__(self, exc, val, trace):
         """ Close TCP connection """
         self.device.close()
 
@@ -196,7 +202,9 @@ class File(Escpos):
         """ Print any command sent in raw format """
         self.device.write(msg)
 
+    def __enter__ (self):
+        return self
 
-    def __del__(self):
+    def __exit__(self, exc, val, trace):
         """ Close system file """
         self.device.close()
