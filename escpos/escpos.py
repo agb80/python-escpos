@@ -95,7 +95,7 @@ class Escpos:
                 if scale > 1.0 or scale <= 0.0:
                     raise ValueError("Scaling factor must be > 0.0 and <= 1.0")
                 # Give a consistent output regardless of the resolution setting
-                scale *= self.printer.pxWidth / float(img.size[0])
+                scale *= self.pxWidth / float(img.size[0])
                 if res is "high":
                     scaleTuple = (scale * 2, scale * 2)
                 else:
@@ -329,7 +329,7 @@ class Escpos:
             # expand string
             lastLineLen = len(string) % self.width + len(rcolStrRstripNewline)
             if lastLineLen > self.width:
-                numOfBlanks = (self.width - lastLineLen) % self.printer.width
+                numOfBlanks = (self.width - lastLineLen) % self.width
                 string += numOfBlanks * " "
                 lastLineLen = len(string) % self.width + len(rcolStrRstripNewline)
             if lastLineLen < self.width:
